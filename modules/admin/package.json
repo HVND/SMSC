@@ -1,0 +1,45 @@
+{
+  "name": "angular2-seed",
+  "version": "1.0.0",
+  "private": "true",
+  "description": "A simple starter Angular2 project",
+  "scripts": {
+    "test": "live-server --open=src/unit-tests.html",
+    "tsc": "tsc",
+    "tsc:w": "tsc -w",
+    "lite": "lite-server",
+    "start": "webpack-dev-server --inline --colors --progress --display-error-details --display-cached --port 8080 --content-base src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HVND/AngularJS.git"
+  },
+  "keywords": [
+    "Angular2",
+    "angular2-seed"
+  ],
+  "author": "Rob Wormald <robwormald@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/HVND/AngularJS"
+  },
+  "homepage": "https://github.com/HVND/AngularJS#readme",
+  "devDependencies": {
+    "ts-loader": "^0.7.2",
+    "typescript": "^1.7.3",
+    "webpack": "^1.12.9",
+    "webpack-dev-server": "^1.14.0",
+    "concurrently": "^1.0.0",
+    "jasmine-core": "2.4.1",
+    "lite-server": "^2.0.1"
+  },
+  "dependencies": {
+    "angular2": "2.0.0-beta.0",
+    "es6-promise": "3.0.2",
+    "systemjs": "0.19.6",
+    "es6-shim": "0.33.3",
+    "reflect-metadata": "0.1.2",
+    "rxjs": "5.0.0-beta.0",
+    "zone.js": "0.5.10"
+  }
+}
