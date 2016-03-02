@@ -111,6 +111,83 @@ export class ODatabase {
         );
     }
 
+    query(iQuery, iLimit, iFetchPlan,
+          successCallback, errorCallback) {
+        if (this.databaseInfo == null) {
+            this.open();
+        }
+
+        if (iLimit == null || iLimit == '') {
+            iLimit = '20';
+        }
+
+        var url = 'query/' + this.encodedDatabaseName + '/sql/' + encodeURIComponent(iQuery) + '/' + iLimit;
+
+        if (iFetchPlan != null && iFetchPlan != '') {
+            url += '/' + encodeURIComponent(iFetchPlan);
+        }
+
+        this.http.get(this.urlPrefix + url + this.urlSuffix,
+            {headers: this.headers})
+            .map(res => res.json())
+            .subscribe(
+                data => {
+                    this.setErrorMessage(null);
+                    this.handleResponse(data);
+                    if (successCallback) {
+                        successCallback(this.commandResult);
+                    }
+                },
+                error => {
+                    this.handleResponse(null);
+                    this.setErrorMessage('Query error: ' + error.responseText);
+                    if (errorCallback) {
+                        errorCallback(this.errorMessage);
+                    }
+                }
+            );
+
+        return successCallback instanceof Function ? null : this.getCommandResult();
+    }
+
+    handleResponse(iResponse) {
+        if (typeof iResponse != 'object') {
+            iResponse = this.UTF8Encode(iResponse);
+        }
+
+        this.setCommandResponse(iResponse);
+
+        if (iResponse != null) {
+            this.setCommandResult(this.transformResponse(iResponse));
+        } else {
+            this.setCommandResult(null);
+        }
+    }
+
+    UTF8Encode(string) {
+        string = string.replace(/\r\n/g, "\n");
+        var utftext = "";
+
+        for ( var n = 0; n < string.length; n++) {
+
+            var c = string.charCodeAt(n);
+
+            if (c < 128) {
+                utftext += String.fromCharCode(c);
+            } else if ((c > 127) && (c < 2048)) {
+                utftext += String.fromCharCode((c >> 6) | 192);
+                utftext += String.fromCharCode((c & 63) | 128);
+            } else {
+                utftext += String.fromCharCode((c >> 12) | 224);
+                utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+                utftext += String.fromCharCode((c & 63) | 128);
+            }
+
+        }
+
+        return utftext;
+    }
+
     transformResponse(msg) {
         if (this.getEvalResponse()) {
             var returnValue;
