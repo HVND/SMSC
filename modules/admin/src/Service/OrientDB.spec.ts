@@ -18,10 +18,4 @@ describe('ODatabase', () => {
         ODatabase
     ]);
 
-    //it('getDatabasePath', inject([ ODatabase ], (odatabase) => {
-    //    var address = "http://orientdb.127.0.0.1.xip.io/smsc";
-    //
-    //    expect("http://orientdb.127.0.0.1.xip.io/smsc").toEqual(address);
-    //}));
-
 });
