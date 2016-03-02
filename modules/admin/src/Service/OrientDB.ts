@@ -23,7 +23,7 @@ export class ODatabase {
     }
 
     getDatabasePath(databasePath:string) {
-        //this.headers.append('Content-Type', 'application/png');
+        this.headers = new Headers({'Content-Type': 'application/json; charset=utf-8'});
         this.databaseUrl = "";
         this.databaseName = "";
         this.encodedDatabaseName = "";
@@ -60,12 +60,16 @@ export class ODatabase {
                     if (!parts.hasOwnProperty(p)) {
                         continue;
                     }
-                    if (this.encodedDatabaseName.length > 0)
+
+                    if (this.encodedDatabaseName.length > 0) {
                         this.encodedDatabaseName += '$';
+                    }
+
                     this.encodedDatabaseName += parts[p];
                 }
-            } else
+            } else {
                 this.encodedDatabaseName = this.databaseName;
+            }
         }
     }
 
@@ -73,22 +77,22 @@ export class ODatabase {
         if (userName == null) {
             userName = '';
         }
+
         if (userPass == null) {
             userPass = '';
         }
+
         if (authProxy != null && authProxy != '') {
             this.urlPrefix = this.databaseUrl + authProxy + "/";
-        } else
+        } else {
             this.urlPrefix = this.databaseUrl;
+        }
 
         if (type == null || type == '') {
             type = 'GET';
         }
 
-        this.headers = new Headers({
-            'Content-Type': 'application/json; charset=utf-8',
-            'Authorization': 'Basic ' + btoa(userName + ':' + userPass)
-        });
+        this.headers.append('Authorization', 'Basic ' + btoa(userName + ':' + userPass));
 
         this.http.get(this.urlPrefix + 'database/' + this.encodedDatabaseName + this.urlSuffix,
              {headers: this.headers})
@@ -97,8 +101,7 @@ export class ODatabase {
                 data => {
                     this.setErrorMessage(null);
                     if (data) {
-                        this.setDatabaseInfo(this.transformResponse(data))
-                        alert();
+                        this.setDatabaseInfo(this.transformResponse(data));
                     }
                 },
                 error => {
@@ -118,6 +121,7 @@ export class ODatabase {
             } else {
                 returnValue = msg;
             }
+
             if (this.getParseResponseLinks()) {
                 return this.parseConnections(returnValue);
             } else {
@@ -133,6 +137,7 @@ export class ODatabase {
             var linkMap = {
                 "foo": 0
             };
+
             linkMap = this.createObjectsLinksMap(obj, linkMap);
             if (linkMap["foo"] == 1) {
                 linkMap = this.putObjectInLinksMap(obj, linkMap);
@@ -149,6 +154,7 @@ export class ODatabase {
             if (!obj.hasOwnProperty(field)) {
                 continue;
             }
+
             var value = obj[field];
             if (typeof value == 'object') {
                 this.getObjectFromLinksMap(value, linkMap);
@@ -235,6 +241,7 @@ export class ODatabase {
                     if (linkMap[rid] == null || !linkMap[rid]) {
                         linkMap[rid] = value;
                     }
+
                     linkMap = this.removeCircleReferencesPopulateMap(value,
                         linkMap);
                 }
@@ -324,30 +331,10 @@ export class ODatabase {
         return Observable.throw(error.json().error || 'Server error');
     }
 
-    //postJSON() {
-    //    var json = JSON.stringify({var1: "test", var2: 3});
-    //    var params = 'json=' + json;
-    //    var headers = new Headers();
-    //    headers.append('Content-Type',
-    //        'application/x-www-form-urlencoded');
-    //
-    //    return this.http.post('http://validate.jsontest.com',
-    //    params,{
-    //            headers: headers
-    //        })
-    //        .map(res => res.json())
-    //}
-
-    getCurrentTime() {
-        //return this.http.get('https://raw.githubusercontent.com/HVND/AngularJS/master//modules/admin/package.json')
-        //return this.http.get('http://localhost:2480/listDatabases')
-        //return this.http.get('http://localhost:2480/database/utf-8')
-        //    .map(res => res.json());
-    }
-
     getUserName():string {
-        if (!this.databaseInfo)
+        if (!this.databaseInfo) {
             return null;
+        }
 
         return this.databaseInfo.currentUser;
     }
