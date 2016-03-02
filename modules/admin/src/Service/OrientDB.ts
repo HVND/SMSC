@@ -109,8 +109,6 @@ export class ODatabase {
                     this.setDatabaseInfo(null);
                 }
         );
-
-        return this.getDatabaseInfo();
     }
 
     transformResponse(msg) {
