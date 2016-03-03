@@ -1,3 +1,5 @@
+"use strict";
+import {Request} from "./Request"
 import {Injectable} from 'angular2/core';
 import {Observable} from 'rxjs/Rx';
 import {Http, Headers, RequestOptions, Response} from 'angular2/http';
@@ -5,6 +7,7 @@ import 'rxjs/add/operator/map'
 
 @Injectable()
 export class ODatabase {
+    private request;
     private databaseUrl;
     private databaseName;
     private encodedDatabaseName;
@@ -17,13 +20,9 @@ export class ODatabase {
     private removeObjectCircleReferences;
     private urlPrefix;
     private urlSuffix;
-    private headers:Headers;
 
-    constructor(private http:Http) {
-    }
-
-    getDatabasePath(databasePath:string) {
-        this.headers = new Headers({'Content-Type': 'application/json; charset=utf-8'});
+    constructor(databasePath: string) {
+        this.request = new Request();
         this.databaseUrl = "";
         this.databaseName = "";
         this.encodedDatabaseName = "";
@@ -73,7 +72,7 @@ export class ODatabase {
         }
     }
 
-    open(userName?:string, userPass?:string, authProxy?:string, type?:string) {
+    open(userName?, userPass?, authProxy?, type?) {
         if (userName == null) {
             userName = '';
         }
@@ -92,30 +91,24 @@ export class ODatabase {
             type = 'GET';
         }
 
-        this.headers.append('Authorization', 'Basic ' + btoa(userName + ':' + userPass));
+        this.request.setDate("admin", "admin");
 
-        this.http.get(this.urlPrefix + 'database/' + this.encodedDatabaseName + this.urlSuffix,
-             {headers: this.headers})
-             .map(res => res.json())
-             .subscribe(
-                data => {
-                    this.setErrorMessage(null);
-                    if (data) {
-                        this.setDatabaseInfo(this.transformResponse(data));
-                    }
-                },
-                error => {
-                    this.setErrorMessage('Connect error: ' + error.statusText);
-                    this.setDatabaseInfo(null);
-                }
-        );
+        this.request.get({
+            url: this.urlPrefix + 'database/' + this.encodedDatabaseName + this.urlSuffix
+        }).then(res => {
+            console.log(typeof JSON.parse(res));
+            this.setErrorMessage(null);
+            if(res) {
+                this.setDatabaseInfo(this.transformResponse(res));
+            }
+        }).catch(error => {
+            this.setErrorMessage('Connect error: ' + error.responseText);
+            this.setDatabaseInfo(null);
+        });
     }
 
-    query(iQuery, iLimit, iFetchPlan,
-          successCallback, errorCallback) {
-        if (this.databaseInfo == null) {
-            this.open();
-        }
+    query(iQuery?, iLimit?, iFetchPlan?,
+          successCallback?, errorCallback?) {
 
         if (iLimit == null || iLimit == '') {
             iLimit = '20';
@@ -127,27 +120,41 @@ export class ODatabase {
             url += '/' + encodeURIComponent(iFetchPlan);
         }
 
-        this.http.get(this.urlPrefix + url + this.urlSuffix,
-            {headers: this.headers})
-            .map(res => res.json())
-            .subscribe(
-                data => {
-                    this.setErrorMessage(null);
-                    this.handleResponse(data);
-                    if (successCallback) {
-                        successCallback(this.commandResult);
-                    }
-                },
-                error => {
-                    this.handleResponse(null);
-                    this.setErrorMessage('Query error: ' + error.responseText);
-                    if (errorCallback) {
-                        errorCallback(this.errorMessage);
-                    }
-                }
-            );
+        this.request.get({
+            url: this.urlPrefix + url + this.urlSuffix
+        }).then(res => {
+            this.setErrorMessage(null);
+            this.handleResponse(res);
+            if (successCallback) {
+                successCallback(this.commandResult);
+            }
+        }).catch(error => {
+            this.handleResponse(null);
+            this.setErrorMessage('Query error: ' + error.responseText);
+            if (errorCallback) {
+                errorCallback(this.errorMessage);
+            }
+        });
 
         return successCallback instanceof Function ? null : this.getCommandResult();
+    }
+
+    close() {
+        if (this.databaseInfo != null) {
+            this.request.get({
+                url: this.urlPrefix + 'disconnect' + this.urlSuffix
+            }).then(res => {
+                this.handleResponse(res);
+                this.setErrorMessage(null);
+            }).catch(error => {
+                this.handleResponse(null);
+                this.setErrorMessage('Command response: '
+                    + error.responseText);
+            });
+        }
+
+        this.databaseInfo = null;
+        return this.getCommandResult();
     }
 
     handleResponse(iResponse) {
@@ -192,7 +199,7 @@ export class ODatabase {
         if (this.getEvalResponse()) {
             var returnValue;
             if (msg.length > 0 && typeof msg != 'object') {
-                returnValue = JSON.parse(msg)
+                returnValue = JSON.parse(msg);
             } else {
                 returnValue = msg;
             }
@@ -406,7 +413,7 @@ export class ODatabase {
         return Observable.throw(error.json().error || 'Server error');
     }
 
-    getUserName():string {
+    getUserName() {
         if (!this.databaseInfo) {
             return null;
         }
@@ -414,7 +421,7 @@ export class ODatabase {
         return this.databaseInfo.currentUser;
     }
 
-    getDatabaseInfo():string {
+    getDatabaseInfo() {
         return this.databaseInfo;
     }
 
@@ -422,7 +429,7 @@ export class ODatabase {
         this.databaseInfo = iDatabaseInfo;
     }
 
-    getUrlSuffix():string {
+    getUrlSuffix() {
         return this.urlSuffix;
     }
 
@@ -430,7 +437,7 @@ export class ODatabase {
         this.urlSuffix = iUrlSuffix;
     }
 
-    getCommandResult():string {
+    getCommandResult() {
         return this.commandResult;
     }
 
@@ -438,7 +445,7 @@ export class ODatabase {
         this.commandResult = iCommandResult;
     }
 
-    getCommandResponse():string {
+    getCommandResponse() {
         return this.commandResponse;
     }
 
@@ -446,7 +453,7 @@ export class ODatabase {
         this.commandResponse = iCommandResponse;
     }
 
-    getErrorMessage():string {
+    getErrorMessage() {
         return this.errorMessage;
     }
 
@@ -454,7 +461,7 @@ export class ODatabase {
         this.errorMessage = iErrorMessage;
     }
 
-    getDatabaseUrl():string {
+    getDatabaseUrl() {
         return this.databaseUrl;
     }
 
@@ -462,7 +469,7 @@ export class ODatabase {
         this.databaseUrl = iDatabaseUrl;
     }
 
-    getDatabaseName():string {
+    getDatabaseName() {
         return this.encodedDatabaseName;
     }
 
@@ -470,7 +477,7 @@ export class ODatabase {
         this.encodedDatabaseName = iDatabaseName;
     }
 
-    getEvalResponse():string {
+    getEvalResponse() {
         return this.evalResponse;
     }
 
@@ -478,7 +485,7 @@ export class ODatabase {
         this.evalResponse = iEvalResponse;
     }
 
-    getParseResponseLinks():string {
+    getParseResponseLinks() {
         return this.parseResponseLink;
     }
 
