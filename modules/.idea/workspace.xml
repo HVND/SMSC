@@ -55,8 +55,8 @@
       <file leaf-file-name="OrientDB.ts" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/admin/src/Service/OrientDB.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.0233593">
-              <caret line="147" column="14" selection-start-line="147" selection-start-column="14" selection-end-line="147" selection-end-column="14" />
+            <state vertical-scroll-proportion="0.046718575">
+              <caret line="30" column="34" selection-start-line="30" selection-start-column="34" selection-end-line="30" selection-end-column="34" />
               <folding />
             </state>
           </provider>
@@ -669,15 +669,15 @@
       <option name="number" value="Default" />
       <updated>1456918773878</updated>
       <workItem from="1456918775134" duration="6627000" />
-      <workItem from="1456931035716" duration="6980000" />
+      <workItem from="1456931035716" duration="7488000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="13607000" />
+    <option name="totallyTimeSpent" value="14115000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="24" width="1920" height="1056" extended-state="6" />
+    <frame x="0" y="24" width="1920" height="1056" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -901,8 +901,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/admin/src/Service/OrientDB.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.0233593">
-          <caret line="147" column="14" selection-start-line="147" selection-start-column="14" selection-end-line="147" selection-end-column="14" />
+        <state vertical-scroll-proportion="0.046718575">
+          <caret line="30" column="34" selection-start-line="30" selection-start-column="34" selection-end-line="30" selection-end-column="34" />
           <folding />
         </state>
       </provider>

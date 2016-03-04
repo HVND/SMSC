@@ -1,6 +1,7 @@
 "use strict";
 export interface RequestGetOptions {
     url: string;
+    type: string;
 }
 export interface RequestGetResponse {
     string;
@@ -14,10 +15,10 @@ export class Request {
         this.userPass = userPass;
     }
 
-    get(options: RequestGetOptions): Promise<RequestGetResponse> {
+    req(options: RequestGetOptions): Promise<RequestGetResponse> {
         return new Promise((resolve, reject) => {
             var xhr = new XMLHttpRequest();
-            xhr.open("get", options.url);
+            xhr.open(options.type, options.url);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.setRequestHeader('Authorization', 'Basic ' + btoa(this.userName + ':' + this.userPass));
             xhr.onload = function () {

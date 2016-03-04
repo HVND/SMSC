@@ -93,10 +93,10 @@ export class ODatabase {
 
         this.request.setDate("admin", "admin");
 
-        this.request.get({
-            url: this.urlPrefix + 'database/' + this.encodedDatabaseName + this.urlSuffix
+        this.request.req({
+            url: this.urlPrefix + 'database/' + this.encodedDatabaseName + this.urlSuffix,
+            type: "get"
         }).then(res => {
-            console.log(typeof JSON.parse(res));
             this.setErrorMessage(null);
             if(res) {
                 this.setDatabaseInfo(this.transformResponse(res));
@@ -120,8 +120,9 @@ export class ODatabase {
             url += '/' + encodeURIComponent(iFetchPlan);
         }
 
-        this.request.get({
-            url: this.urlPrefix + url + this.urlSuffix
+        this.request.req({
+            url: this.urlPrefix + url + this.urlSuffix,
+            type: "get"
         }).then(res => {
             this.setErrorMessage(null);
             this.handleResponse(res);
@@ -141,8 +142,9 @@ export class ODatabase {
 
     close() {
         if (this.databaseInfo != null) {
-            this.request.get({
-                url: this.urlPrefix + 'disconnect' + this.urlSuffix
+            this.request.req({
+                url: this.urlPrefix + 'disconnect' + this.urlSuffix,
+                type: "get"
             }).then(res => {
                 this.handleResponse(res);
                 this.setErrorMessage(null);
@@ -228,7 +230,30 @@ export class ODatabase {
                 }
             }
         }
+
         return obj;
+    }
+
+    createObjectsLinksMap(obj, linkMap) {
+        for (var field in obj) {
+            if (!obj.hasOwnProperty(field)) {
+                continue;
+            }
+            var value = obj[field];
+            if (typeof value == 'object') {
+                this.createObjectsLinksMap(value, linkMap);
+            } else {
+                if (typeof value == 'string') {
+                    if (value.length > 0 && value.charAt(0) == '#') {
+                        if (!linkMap.hasOwnProperty(value)) {
+                            linkMap["foo"] = 1;
+                            linkMap[value] = null;
+                        }
+                    }
+                }
+            }
+        }
+        return linkMap;
     }
 
     getObjectFromLinksMap = function (obj, linkMap) {
@@ -264,28 +289,6 @@ export class ODatabase {
                     && linkMap[value] === null) {
                     linkMap["foo"] = 2;
                     linkMap[value] = obj;
-                }
-            }
-        }
-        return linkMap;
-    }
-
-    createObjectsLinksMap(obj, linkMap) {
-        for (var field in obj) {
-            if (!obj.hasOwnProperty(field)) {
-                continue;
-            }
-            var value = obj[field];
-            if (typeof value == 'object') {
-                this.createObjectsLinksMap(value, linkMap);
-            } else {
-                if (typeof value == 'string') {
-                    if (value.length > 0 && value.charAt(0) == '#') {
-                        if (!linkMap.hasOwnProperty(value)) {
-                            linkMap["foo"] = 1;
-                            linkMap[value] = null;
-                        }
-                    }
                 }
             }
         }
@@ -405,7 +408,6 @@ export class ODatabase {
         }
     }
 
-
     private handleError(error:Response) {
         // in a real world app, we may send the server to some remote logging infrastructure
         // instead of just logging it to the console
@@ -419,6 +421,85 @@ export class ODatabase {
         }
 
         return this.databaseInfo.currentUser;
+    }
+
+    create(userName, userPass, type,
+                      databaseType) {
+        if (userName == null)
+            userName = '';
+
+        if (userPass == null)
+            userPass = '';
+
+        if (databaseType == null)
+            databaseType = 'document';
+
+        this.urlPrefix = this.databaseUrl;
+
+        if (type == null || type == '') {
+            type = 'local';
+        }
+
+        this.request.req({
+            url: this.urlPrefix + 'database/' + this.encodedDatabaseName + this.urlSuffix,
+            type: "post"
+        }).then(res => {
+            this.setErrorMessage(null);
+            this.setDatabaseInfo(this.transformResponse(res));
+        }).catch(error => {
+            this.setErrorMessage('Connect error: ' + error.responseText);
+            this.setDatabaseInfo(null);
+        });
+
+        return this.getDatabaseInfo();
+    }
+
+    metadata() {
+        this.request.req({
+            url: this.urlPrefix + 'database/' + this.encodedDatabaseName
+            + this.urlSuffix,
+            type: "get"
+        }).then(res => {
+            this.setErrorMessage(null);
+            this.setDatabaseInfo(this.transformResponse(res));
+        }).catch(error => {
+            this.setErrorMessage('Connect error: ' + error.responseText);
+            this.setDatabaseInfo(null);
+        });
+
+        return this.getDatabaseInfo();
+    }
+
+    load = function(iRID, iFetchPlan) {
+        if (this.databaseInfo == null) {
+            this.open();
+        }
+
+        if (iFetchPlan != null && iFetchPlan != '') {
+            iFetchPlan = '/' + iFetchPlan;
+        } else {
+            iFetchPlan = '';
+        }
+
+        if (iRID && iRID.charAt(0) == '#') {
+            iRID = iRID.substring(1);
+        }
+
+        iRID = encodeURIComponent(iRID);
+
+        this.request.req({
+            url: this.urlPrefix + 'document/' + this.encodedDatabaseName + '/'
+            + iRID + iFetchPlan + this.urlSuffix,
+            type: "get"
+        }).then(res => {
+            this.setErrorMessage(null);
+            this.handleResponse(res);
+        }).catch(error => {
+            this.handleResponse(null);
+            this.setErrorMessage('Query error: ' + error.responseText);
+        });
+
+        return this.getCommandResult();
     }
 
     getDatabaseInfo() {
