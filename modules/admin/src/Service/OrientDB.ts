@@ -1,5 +1,4 @@
 "use strict";
-import {Request} from "./Request"
 import {Injectable} from 'angular2/core';
 import {Observable} from 'rxjs/Rx';
 import {Http, Headers, RequestOptions, Response} from 'angular2/http';
@@ -22,7 +21,6 @@ export class ODatabase {
     private urlSuffix;
 
     constructor(databasePath: string) {
-        this.request = new Request();
         this.databaseUrl = "";
         this.databaseName = "";
         this.encodedDatabaseName = "";
@@ -91,19 +89,25 @@ export class ODatabase {
             type = 'GET';
         }
 
-        this.request.setDate("admin", "admin");
-
-        this.request.req({
-            url: this.urlPrefix + 'database/' + this.encodedDatabaseName + this.urlSuffix,
-            type: "get"
-        }).then(res => {
-            this.setErrorMessage(null);
-            if(res) {
-                this.setDatabaseInfo(this.transformResponse(res));
-            }
-        }).catch(error => {
-            this.setErrorMessage('Connect error: ' + error.responseText);
-            this.setDatabaseInfo(null);
+        return new Promise((resolve, reject) => {
+            var xhr = new XMLHttpRequest();
+            var odatabase = this;
+            xhr.open("GET", this.urlPrefix + 'database/' + this.encodedDatabaseName + this.urlSuffix);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('Authorization', 'Basic ' + btoa(userName + ':' + userPass));
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    odatabase.setErrorMessage(null);
+                    if(xhr.statusText) {
+                        odatabase.setDatabaseInfo(odatabase.transformResponse(xhr.responseText));
+                    }
+                    resolve(odatabase.getDatabaseInfo());
+                } else {
+                    odatabase.setDatabaseInfo(null);
+                    reject(new Error(xhr.statusText));
+                }
+            };
+            xhr.send();
         });
     }
 
@@ -490,13 +494,80 @@ export class ODatabase {
         this.request.req({
             url: this.urlPrefix + 'document/' + this.encodedDatabaseName + '/'
             + iRID + iFetchPlan + this.urlSuffix,
-            type: "get"
+            type: "get",
+            body: JSON.stringify({'name': 'dima'})
         }).then(res => {
             this.setErrorMessage(null);
             this.handleResponse(res);
         }).catch(error => {
             this.handleResponse(null);
             this.setErrorMessage('Query error: ' + error.responseText);
+        });
+
+        return this.getCommandResult();
+    }
+
+    save(obj, errorCallback, successCallback) {
+        if (this.databaseInfo == null) {
+            this.open();
+        }
+
+        var rid = obj['@rid'];
+        var methodType = rid == null || rid == '-1:-1' ? 'POST' : 'PUT';
+        if (this.removeObjectCircleReferences && typeof obj == 'object') {
+            this.removeCircleReferences(obj, {});
+        }
+
+        var url = this.urlPrefix + 'document/' + this.encodedDatabaseName;
+        if (rid) {
+            url += '/' + encodeURIComponent(rid);
+        }
+
+        this.request.req({
+            url: url + this.urlSuffix,
+            type: "get"
+        }).then(res => {
+            this.setErrorMessage(null);
+            this.setCommandResponse(res);
+            this.setCommandResult(res);
+            if (successCallback)
+                successCallback(res.responseText);
+        }).catch(error => {
+            this.handleResponse(null);
+            this.setErrorMessage('Save error: ' + error.responseText);
+            if (errorCallback) {
+                errorCallback(error.responseText);
+            }
+        });
+
+        return this.getCommandResult();
+    }
+
+    indexPut(iIndexName, iKey, iValue) {
+        if (this.databaseInfo == null) {
+            this.open();
+        }
+
+        var req = this.urlPrefix + 'index/' + this.encodedDatabaseName + '/'
+            + iIndexName + "/" + iKey;
+
+        var content;
+        if (typeof iValue == "object") {
+            content = JSON.parse(iValue);
+        }
+        else {
+            req += "/" + iValue;
+            content = null;
+        }
+
+        this.request.req({
+            url: req + this.urlSuffix,
+            type: "put"
+        }).then(res => {
+            this.setErrorMessage(null);
+        }).catch(error => {
+            this.handleResponse(null);
+            this.setErrorMessage('Index put error: ' + error.responseText);
         });
 
         return this.getCommandResult();
