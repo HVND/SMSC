@@ -30,11 +30,9 @@ describe('ODatabase', () => {
         testService.open("admin", "admin")
             .then(
                 res => {
-                    console.log(res);
                     expect(res).toBeDefined();
                 }
             );
-        //expect(testService.name).toBe('Injected Service');
     }));
 
 });

@@ -31,12 +31,11 @@ var metadata = {
 /*
  * Config
  */
-module.exports = helpers.validate({
+module.exports = {
   // static data for index.html
   metadata: metadata,
 
   devtool: 'source-map',
-  cache: false,
   debug: false,
 
   entry: {
@@ -53,9 +52,7 @@ module.exports = helpers.validate({
   },
 
   resolve: {
-    cache: false,
-    // ensure loader extensions match
-    extensions: ['', '.ts','.js']
+    extensions: ['', '.ts', '.js']
   },
 
   module: {
@@ -84,25 +81,27 @@ module.exports = helpers.validate({
         query: {
           // remove TypeScript helpers to be injected below by DefinePlugin
           'compilerOptions': {
-            'removeComments': true,
-            'noEmitHelpers': true,
+            'removeComments': true
           }
         },
         exclude: [
-          /\.(spec|e2e)\.ts$/
+          /\.(spec|e2e)\.ts$/,
+          helpers.root('node_modules')
         ]
       },
 
       // Support for *.json files.
       {
         test: /\.json$/,
-        loader: 'json-loader'
+        loader: 'json-loader',
+        exclude: [ helpers.root('node_modules') ]
       },
 
       // Support for CSS as raw text
       {
         test: /\.css$/,
-        loader: 'raw-loader'
+        loader: 'raw-loader',
+        exclude: [ helpers.root('node_modules') ]
       },
 
       // support for .html as raw text
@@ -114,7 +113,12 @@ module.exports = helpers.validate({
         ]
       }
 
+    ],
+    noParse: [
+      helpers.root('zone.js', 'dist'),
+      helpers.root('angular2', 'bundles')
     ]
+
   },
 
   plugins: [
@@ -142,14 +146,6 @@ module.exports = helpers.validate({
         'NODE_ENV': JSON.stringify(metadata.ENV)
       }
     }),
-    new ProvidePlugin({
-      // TypeScript helpers
-      '__metadata': 'ts-helper/metadata',
-      '__decorate': 'ts-helper/decorate',
-      '__awaiter': 'ts-helper/awaiter',
-      '__extends': 'ts-helper/extends',
-      '__param': 'ts-helper/param'
-    }),
     new UglifyJsPlugin({
       // to debug prod builds uncomment //debug lines and comment //prod lines
 
@@ -165,7 +161,10 @@ module.exports = helpers.validate({
       // disable mangling because of a bug in angular2 beta.1, beta.2 and beta.3
       // TODO(mastertinner): enable mangling as soon as angular2 beta.4 is out
       // mangle: { screw_ie8 : true },//prod
-      mangle: false,
+      mangle: {
+        screw_ie8 : true,
+        except: ['RouterLink', 'NgFor', 'NgModel'] // needed for uglify RouterLink problem
+      },// prod
       compress : { screw_ie8 : true },//prod
       comments: false//prod
 
@@ -192,8 +191,6 @@ module.exports = helpers.validate({
     customAttrAssign: [ /\)?\]?=/ ]
   },
   // don't use devServer for production
-
-  // we need this due to problems with es6-shim
   node: {
     global: 'window',
     progress: false,
@@ -202,4 +199,4 @@ module.exports = helpers.validate({
     clearImmediate: false,
     setImmediate: false
   }
-});
+};

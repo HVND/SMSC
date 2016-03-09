@@ -1,9 +1,9 @@
 "use strict";
+import 'rxjs/add/operator/map'
 import {Injectable} from 'angular2/core';
 import {Request} from './Request';
 import {Observable} from 'rxjs/Rx';
 import {Http, Headers, RequestOptions, Response} from 'angular2/http';
-import 'rxjs/add/operator/map'
 
 @Injectable()
 export class ODatabase {
@@ -128,20 +128,21 @@ export class ODatabase {
         return this.request.httpRequest({
             url: this.urlPrefix + url + this.urlSuffix,
             type: "get"
-        }).then(res => {
-            this.setErrorMessage(null);
-            this.handleResponse(res);
-            if (successCallback) {
-                successCallback(this.commandResult);
-            }
-            return successCallback instanceof Function ? null : this.getCommandResult();
-        }).catch(error => {
-            this.handleResponse(null);
-            this.setErrorMessage('Query error: ' + error.responseText);
-            if (errorCallback) {
-                errorCallback(this.errorMessage);
-            }
-        });
+        })
+            .then(res => {
+                this.setErrorMessage(null);
+                this.handleResponse(res);
+                if (successCallback) {
+                    successCallback(this.commandResult);
+                }
+                return successCallback instanceof Function ? null : this.getCommandResult();
+            }).catch(error => {
+                this.handleResponse(null);
+                this.setErrorMessage('Query error: ' + error.responseText);
+                if (errorCallback) {
+                    errorCallback(this.errorMessage);
+                }
+            });
     }
 
     close() {
@@ -149,15 +150,16 @@ export class ODatabase {
             return this.request.httpRequest({
                 url: this.urlPrefix + 'disconnect' + this.urlSuffix,
                 type: "get"
-            }).then(res => {
-                this.handleResponse(res);
-                this.setErrorMessage(null);
-                return this.getCommandResult();
-            }).catch(error => {
-                this.handleResponse(null);
-                this.setErrorMessage('Command response: '
-                    + error.responseText);
-            });
+            })
+                .then(res => {
+                    this.handleResponse(res);
+                    this.setErrorMessage(null);
+                    return this.getCommandResult();
+                }).catch(error => {
+                    this.handleResponse(null);
+                    this.setErrorMessage('Command response: '
+                        + error.responseText);
+                });
         }
 
         this.databaseInfo = null;
@@ -284,6 +286,7 @@ export class ODatabase {
             if (!obj.hasOwnProperty(field)) {
                 continue;
             }
+
             var value = obj[field];
             if (typeof value == 'object') {
                 this.putObjectInLinksMap(value, linkMap);
@@ -297,7 +300,7 @@ export class ODatabase {
             }
         }
         return linkMap;
-    }
+    };
 
     removeCircleReferences(obj, linkMap) {
         linkMap = this.removeCircleReferencesPopulateMap(obj, linkMap);
@@ -445,18 +448,20 @@ export class ODatabase {
         }
 
         return this.request.httpRequest({
-            url: this.urlPrefix + 'database/' + this.encodedDatabaseName + this.urlSuffix,
-            type: "get",
+            url: this.urlPrefix + 'database/' + this.encodedDatabaseName + '/'
+            + type + '/' + databaseType + this.urlSuffix,
+            type: "post",
             userName: userName,
             userPass: userPass,
-        }).then(res => {
-            this.setErrorMessage(null);
-            this.setDatabaseInfo(this.transformResponse(res));
-            return this.getDatabaseInfo();
-        }).catch(error => {
-            this.setErrorMessage('Connect error: ' + error.responseText);
-            this.setDatabaseInfo(null);
-        });
+        })
+            .then(res => {
+                this.setErrorMessage(null);
+                this.setDatabaseInfo(this.transformResponse(res));
+                return this.getDatabaseInfo();
+            }).catch(error => {
+                this.setErrorMessage('Connect error: ' + error.responseText);
+                this.setDatabaseInfo(null);
+            });
     }
 
     metadata() {
@@ -464,14 +469,15 @@ export class ODatabase {
             url: this.urlPrefix + 'database/' + this.encodedDatabaseName
             + this.urlSuffix,
             type: "get"
-        }).then(res => {
-            this.setErrorMessage(null);
-            this.setDatabaseInfo(this.transformResponse(res));
-            return this.getDatabaseInfo();
-        }).catch(error => {
-            this.setErrorMessage('Connect error: ' + error.responseText);
-            this.setDatabaseInfo(null);
-        });
+        })
+            .then(res => {
+                this.setErrorMessage(null);
+                this.setDatabaseInfo(this.transformResponse(res));
+                return this.getDatabaseInfo();
+            }).catch(error => {
+                this.setErrorMessage('Connect error: ' + error.responseText);
+                this.setDatabaseInfo(null);
+            });
     }
 
     load(iRID?, iFetchPlan?) {
@@ -490,19 +496,20 @@ export class ODatabase {
         }
 
         iRID = encodeURIComponent(iRID);
-        console.log(this.urlSuffix);
+
         return this.request.httpRequest({
             url: this.urlPrefix + 'document/' + this.encodedDatabaseName + '/'
             + iRID + iFetchPlan + this.urlSuffix,
             type: "get",
-        }).then(res => {
-            this.setErrorMessage(null);
-            this.handleResponse(res);
-            return this.getCommandResult();
-        }).catch(error => {
-            this.handleResponse(null);
-            this.setErrorMessage('Query error: ' + error.responseText);
-        });
+        })
+            .then(res => {
+                this.setErrorMessage(null);
+                this.handleResponse(res);
+                return this.getCommandResult();
+            }).catch(error => {
+                this.handleResponse(null);
+                this.setErrorMessage('Query error: ' + error.responseText);
+            });
     }
 
     save(obj, errorCallback, successCallback) {
@@ -521,25 +528,26 @@ export class ODatabase {
             url += '/' + encodeURIComponent(rid);
         }
 
-        this.request.httpRequest({
+        return  this.request.httpRequest({
             url: url + this.urlSuffix,
             type: methodType,
             body: JSON.parse(obj)
-        }).then(res => {
-            this.setErrorMessage(null);
-            this.setCommandResponse(res);
-            this.setCommandResult(res);
-            if (successCallback) {
-                successCallback(res.responseText);
-            }
-            return this.getCommandResult();
-        }).catch(error => {
-            this.handleResponse(null);
-            this.setErrorMessage('Save error: ' + error.responseText);
-            if (errorCallback) {
-                errorCallback(error.responseText);
-            }
-        });
+        })
+            .then(res => {
+                this.setErrorMessage(null);
+                this.setCommandResponse(res);
+                this.setCommandResult(res);
+                if (successCallback) {
+                    successCallback(res);
+                }
+                return this.getCommandResult();
+            }).catch(error => {
+                this.handleResponse(null);
+                this.setErrorMessage('Save error: ' + error.responseText);
+                if (errorCallback) {
+                    errorCallback(error.responseText);
+                }
+            });
     }
 
     indexPut(iIndexName, iKey, iValue) {
@@ -559,17 +567,17 @@ export class ODatabase {
             content = null;
         }
 
-        this.request.req({
+        return this.request.httpRequest({
             url: req + this.urlSuffix,
             type: "put"
-        }).then(res => {
-            this.setErrorMessage(null);
-        }).catch(error => {
-            this.handleResponse(null);
-            this.setErrorMessage('Index put error: ' + error.responseText);
-        });
-
-        return this.getCommandResult();
+        })
+            .then(res => {
+                this.setErrorMessage(null);
+                return this.getCommandResult();
+            }).catch(error => {
+                this.handleResponse(null);
+                this.setErrorMessage('Index put error: ' + error.responseText);
+            });
     }
 
     getDatabaseInfo() {
@@ -580,14 +588,6 @@ export class ODatabase {
         this.databaseInfo = iDatabaseInfo;
     }
 
-    getUrlSuffix() {
-        return this.urlSuffix;
-    }
-
-    setUrlSuffix(iUrlSuffix) {
-        this.urlSuffix = iUrlSuffix;
-    }
-
     getCommandResult() {
         return this.commandResult;
     }
@@ -596,51 +596,19 @@ export class ODatabase {
         this.commandResult = iCommandResult;
     }
 
-    getCommandResponse() {
-        return this.commandResponse;
-    }
-
     setCommandResponse(iCommandResponse) {
         this.commandResponse = iCommandResponse;
-    }
-
-    getErrorMessage() {
-        return this.errorMessage;
     }
 
     setErrorMessage(iErrorMessage) {
         this.errorMessage = iErrorMessage;
     }
 
-    getDatabaseUrl() {
-        return this.databaseUrl;
-    }
-
-    setDatabaseUrl(iDatabaseUrl) {
-        this.databaseUrl = iDatabaseUrl;
-    }
-
-    getDatabaseName() {
-        return this.encodedDatabaseName;
-    }
-
-    setDatabaseName(iDatabaseName) {
-        this.encodedDatabaseName = iDatabaseName;
-    }
-
     getEvalResponse() {
         return this.evalResponse;
     }
 
-    setEvalResponse(iEvalResponse) {
-        this.evalResponse = iEvalResponse;
-    }
-
     getParseResponseLinks() {
         return this.parseResponseLink;
-    }
-
-    setParseResponseLinks(iParseResponseLinks) {
-        this.parseResponseLink = iParseResponseLinks;
     }
 }
