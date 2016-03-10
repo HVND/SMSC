@@ -7,12 +7,6 @@ import {
     TestComponentBuilder,
     setBaseTestProviders
 } from 'angular2/testing';
-import {
-    TEST_BROWSER_PLATFORM_PROVIDERS,
-    TEST_BROWSER_APPLICATION_PROVIDERS
-} from 'angular2/platform/testing/browser';
-setBaseTestProviders(TEST_BROWSER_PLATFORM_PROVIDERS,
-    TEST_BROWSER_APPLICATION_PROVIDERS);
 
 import {Component, provide} from 'angular2/core';
 
@@ -26,13 +20,12 @@ describe('ODatabase', () => {
     ]);
 
     it('should have name property set', inject([ODatabase], (testService: ODatabase) => {
-        testService = new ODatabase("http://orientdb.127.0.0.1.xip.io/smsc");
-        testService.open("admin", "admin")
+        testService = new ODatabase('http://orientdb.127.0.0.1.xip.io/smsc');
+        testService.open('admin', 'admin')
             .then(
                 res => {
-                    expect(res).toBeDefined();
+                    expect(typeof res).toBe('object');
                 }
             );
     }));
-
 });

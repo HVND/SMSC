@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 export interface RequestGetOptions {
     url: string;
     type: string;
@@ -24,7 +24,8 @@ export class Request {
             xhr.getResponseHeader('Content-Type');
             xhr.open(options.type, options.url, true, options.userName, options.userPass);
             xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('Authorization', 'Basic ' + btoa(this.userName + ':' + this.userPass));
+            xhr.setRequestHeader('Authorization', 'Basic ' +
+                btoa(this.userName + ':' + this.userPass));
             xhr.onload = function () {
                 if (xhr.status === 200) {
                     resolve(xhr.responseText)
