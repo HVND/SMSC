@@ -3,7 +3,6 @@ import 'rxjs/add/operator/map'
 import {Injectable} from 'angular2/core';
 import {Request} from './Request';
 import {Observable} from 'rxjs/Rx';
-import {Http, Headers, RequestOptions, Response} from 'angular2/http';
 
 @Injectable()
 export class ODatabase {
@@ -300,7 +299,7 @@ export class ODatabase {
             }
         }
         return linkMap;
-    };
+    }
 
     removeCircleReferences(obj, linkMap) {
         linkMap = this.removeCircleReferencesPopulateMap(obj, linkMap);
@@ -415,7 +414,7 @@ export class ODatabase {
         }
     }
 
-    private handleError(error:Response) {
+    private handleError(error) {
         // in a real world app, we may send the server to some remote logging infrastructure
         // instead of just logging it to the console
         console.error(error);
@@ -512,7 +511,7 @@ export class ODatabase {
             });
     }
 
-    save(obj, errorCallback, successCallback) {
+    save(obj?, errorCallback?, successCallback?) {
         if (this.databaseInfo == null) {
             this.open();
         }
@@ -550,7 +549,7 @@ export class ODatabase {
             });
     }
 
-    indexPut(iIndexName, iKey, iValue) {
+    indexPut(iIndexName?, iKey?, iValue?) {
         if (this.databaseInfo == null) {
             this.open();
         }
