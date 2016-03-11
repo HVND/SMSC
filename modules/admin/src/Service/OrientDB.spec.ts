@@ -14,6 +14,8 @@ import {Component, provide} from 'angular2/core';
 import {ODatabase} from './OrientDB';
 
 describe('ODatabase', () => {
+    db: ODatabase;
+
     beforeEach(() => {
         this.db = new ODatabase('http://orientdb.127.0.0.1.xip.io/smsc')
     });
