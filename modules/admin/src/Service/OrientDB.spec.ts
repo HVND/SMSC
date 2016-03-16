@@ -8,79 +8,57 @@ import {
     setBaseTestProviders
 } from 'angular2/testing';
 
-import {Component, provide} from 'angular2/core';
 // Load the implementations that should be tested
 import {ODatabase} from './OrientDB';
+import {Mock} from "./Mock";
 
 describe('ODatabase', () => {
-    db: ODatabase;
 
     beforeEach(() => {
-        this.db = new ODatabase('http://orientdb.127.0.0.1.xip.io/smsc')
+        this.db = Mock.mock(new ODatabase('http://orientdb.127.0.0.1.xip.io/smsc'));
     });
 
     it('open OrientDB', () => {
-        this.db.open('admin', 'admin')
-            .then(
-                res => {
-                    expect(res).toBeDefined();
-                }
-            );
+        this.db.open('admin', 'admin');
+
+        expect(this.db.open).toHaveBeenCalled();
     });
 
     it('query to OrientDB', () => {
-        this.db.query('select from OUser')
-            .then(
-                res => {
-                    expect(res).toBeDefined();
-                }
-            );
+        this.db.query('select from OUser');
+
+        expect(this.db.query).toHaveBeenCalled();
     });
 
     it('create user', () => {
-        this.db.create('test', '4862')
-            .then(
-                res => {
-                    expect(res).toBeDefined();
-                }
-            );
+        this.db.create('test', '4862');
+
+        expect(this.db.create).toHaveBeenCalled();
     });
 
     it('loads a record from the record ID', () => {
-        this.db.load('12:0')
-            .then(
-                res => {
-                    expect(res).toBeDefined();
-                }
-            );
+        this.db.load('12:0');
+
+        expect(this.db.load).toHaveBeenCalled();
     });
 
     it('metadata', () => {
-        this.db.metadata()
-            .then(
-                res => {
-                    expect(res).toBeDefined();
-                }
-            );
+        this.db.metadata();
+
+        expect(this.db.metadata).toHaveBeenCalled();
     });
 
     it('save', () => {
-        this.db.save()
-            .then(
-                res => {
-                    expect(res).toBeDefined();
-                }
-            );
+        this.db.save();
+
+        expect(this.db.save).toHaveBeenCalled();
     });
 
     it('indexPut', () => {
-        this.db.indexPut()
-            .then(
-                res => {
-                    expect(res).toBeDefined();
-                }
-            );
-    });
-});
+        this.db.indexPut();
 
+        expect(this.db.indexPut).toHaveBeenCalled();
+    });
+
+});
 

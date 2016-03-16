@@ -66,6 +66,7 @@
     "ie-shim": "^0.1.0",
     "imports-loader": "^0.6.5",
     "istanbul-instrumenter-loader": "^0.2.0",
+    "jasmine-mocks": "0.0.2",
     "json-loader": "^0.5.4",
     "karma": "^0.13.21",
     "karma-chrome-launcher": "^0.2.2",
