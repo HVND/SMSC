@@ -19,9 +19,13 @@ describe('ODatabase', () => {
     });
 
     it('open OrientDB', () => {
-        this.db.open('admin', 'admin');
-
-        expect(this.db.open).toHaveBeenCalled();
+        this.db.open('admin', 'admin')
+            .then(
+                (res) => {
+                    expect(res).toBeUndefined();
+                }
+            );
+        //expect(this.db.open).toHaveBeenCalled();
     });
 
     it('query to OrientDB', () => {
