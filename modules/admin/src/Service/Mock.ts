@@ -4,6 +4,7 @@ export class Mock {
         for(var key in constr) {
             keys.push(key);
         }
+
         return keys.length > 0 ? jasmine.createSpyObj( name || "mock", keys ) : {};
     };
 }
