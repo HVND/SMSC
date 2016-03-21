@@ -3,8 +3,8 @@
     padding: 0;
 }
 
-html {
-    background: #E9ECF3;
+body {
+    background: #E9ECF3 !important;
 }
 
 /* Clearfix */

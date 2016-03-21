@@ -143,10 +143,11 @@ html {
 
 .right-panel .glyphicon-log-out {
     float: left;
-    display: block;
-    color: #000;
-    width: 10px;
-    height: 10px;
+    margin: 6px 6px 0 0;
+    cursor: pointer;
+    color: #D1D1D1;
 }
+
+.right-panel .glyphicon-log-out:hover {color: #B0B0B0;}
 
 .side-bar {float: left;}
